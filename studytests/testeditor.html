@@ -1,0 +1,733 @@
+﻿<html>
+
+<head>
+    <title>
+        Редактор тестов
+    </title>
+    <link href="@css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <script src="@js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+	
+</head>
+
+<body>
+
+
+<!--Окно массового добавления-->
+<div class="modal fade" id="mass-add-modal" tabindex="-1" aria-labelledby="mass-add-modalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="mass-add-modalLabel">Modal title</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+
+    <div class="input-group needs-validation">
+  <span class="input-group-text">Введите через запятую</span>
+  <textarea class="form-control" aria-label="With textarea" placeholder="Имя 1,Имя 2" style="height: 161px;" id="mass-add-area"></textarea>
+<div class="valid-feedback">Пользователи добавлены!</div>
+    
+</div>
+
+<div class="input-group">
+    <button type="button" class="btn btn-outline-success" style="margin-top: 0.5rem;" id="mass-add-btn">Добавить</button>
+</div>
+    
+</div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--Поле ввода пароля теста-->
+	<div class="position-absolute top-50 start-50 translate-middle w-50" id = "login_panel">
+		<div class="nav nav-tabs" id="nav-tab" role="tablist">
+			<button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#registerTab" type="button" role="tab" aria-controls="home" aria-selected="true">Создать</button>
+			<button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#loginTab" type="button" role="tab" aria-controls="profile" aria-selected="false">Открыть</button>
+		</div>
+		<div class="tab-content" id="myTabContent">
+		  <div class="tab-pane fade show active" id="registerTab" role="tabpanel" aria-labelledby="home-tab">
+			<div class="input-group has-validation mb-3">
+				<input type="text" class="form-control" placeholder="Имя теста" aria-label="Имя теста" aria-describedby="create_test_btn" id="test_name_input">
+				<button class="btn btn-outline-secondary" type="button" id="create_test_btn">Создать</button>
+				<div class="invalid-feedback">Введите имя теста</div>
+			</div>
+			<div class="form-check form-switch">
+			  <input class="form-check-input" type="checkbox" role="switch" id="is_form_checkbox">
+			  <label class="form-check-label" for="flexSwitchCheckDefault">Режим анкеты</label>
+			</div>
+		  </div>
+		  <div class="tab-pane fade" id="loginTab" role="tabpanel" aria-labelledby="profile-tab">
+			<div class="input-group has-validation mb-3">
+				<input type="text" class="form-control" placeholder="Пароль теста" aria-label="Пароль теста" aria-describedby="open_btn" id="password_input">
+				<button class="btn btn-outline-secondary" type="button" id="open_btn">Открыть</button>
+				<div class="invalid-feedback">Неверный код</div>
+			</div>
+		  </div>
+		</div>
+	</div>
+
+<!--Главное окно-->
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <div class="row row-cols-1 row-cols-md-1 g-4 p-5" style="max-width: 48rem;" id="cards_grid">
+                    <div class="col"><h3 id="test-title"></h3>
+					<a class="link-dark collapsed" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">Пароль теста</a>
+					</div>
+					<div class="collapse" id="collapseExample" style="">
+					  <div class="card card-body" id = "password-output">
+						Пароль))
+					  </div>
+					</div>
+                </div>
+            </div>
+            <div class="col p-3 g-4 fade" id="users-column">
+                <h3>Пользователи 
+<div class="btn-group">
+						<button type="button" class="btn btn-outline-dark" id="update-users-btn" style="padding: 0 10px;font-size: 10pt;">Обновить</button>
+						<button class="btn btn-outline-dark dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+						<span class="visually-hidden">Some</span>
+						</button><ul class="dropdown-menu dropdown-menu-end" style="padding: 0px 10px; font-size: 10pt;">
+							<li><a class="dropdown-item disabled" href="#" id="export-btn" data-bs-toggle="modal" data-bs-target="#">Экспорт</a></li>
+						</ul>
+
+					</div></h3>
+                <div class="input-group mb-3" style="max-width: 25rem;">
+                    <input type="text" id="new-user-name-text" class="form-control" placeholder="Имя пользователя" aria-label="Recipient's username" aria-describedby="button-addon2">
+                    <input type="text" id="new-user-count" class="form-control" placeholder="Количество" aria-label="Username" aria-describedby="basic-addon1">
+					<div class="btn-group">
+						<button class="btn btn-outline-secondary" type="button" id="add-user-btn">Добавить</button>
+						<button class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+						<span class="visually-hidden">Some</span>
+						</button><ul class="dropdown-menu dropdown-menu-end" style="">
+							<li><a class="dropdown-item" href="#mass-add-modal" id="mass-adding-btn" data-bs-toggle="modal" data-bs-target="#mass-add-modal">Массовое добавление</a></li>
+						</ul>
+
+					</div>
+                </div>
+                <div class="row">
+                    <div class="col-5">
+                        <div class="list-group" id="user-list-tab" role="tablist">
+                            <a class="list-group-item list-group-item-action" id="list-home-list" data-bs-toggle="list" role="tab" aria-controls="list-home">NAME<span class="badge bg-primary" style="margin: 3px;">COUNT</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-8 p-4">
+                        <div class="tab-content" id="user-tabContent">
+                            <div class="tab-pane fade" id="list-home" role="tabpanel" aria-labelledby="list-home-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<!--Карта вопроса-->
+    <div class="card fade" id="q_card">
+        <div class="card-body">
+            <h5 class="card-title">Card title</h5>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
+                <label class="form-check-label" for="flexRadioDefault1" id="radio_1">
+                      Default radio
+                    </label>
+            </div>
+            <div class="input-group mb-3 p-3">
+                <span class="input-group-text" id="basic-addon1">Ответ:</span>
+                <input type="text" class="form-control" placeholder="" value="" aria-label="Username" aria-describedby="basic-addon1" disabled>
+            </div>
+            <button type="button" class="btn btn-outline-danger" style="display: block;
+                margin-left: auto;
+                margin-right: 0;">Удалить</button>
+        </div>
+    </div>
+
+<!--Редактор вопросов-->
+    <div class="col">
+        <div class="card" id="card_editor">
+            <div class="card-body">
+                <h5 class="card-title p-2" id="new-card-title">Вопрос</h5>
+                <div class="btn-group p-2" role="group" aria-label="Basic radio toggle button group">
+                    <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" checked>
+                    <label class="btn btn-outline-primary" for="btnradio1">Кружочки</label>
+
+                    <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off">
+                    <label class="btn btn-outline-primary" for="btnradio2">Квадратики</label>
+
+                    <input type="radio" class="btn-check" name="btnradio" id="btnradio3" autocomplete="off">
+                    <label class="btn btn-outline-primary" for="btnradio3">Текст</label>
+                </div>
+                <div class="p-2">
+                    <div class="form-check">
+    
+                        
+<input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
+                        <div style="display:flex">
+						<label class="form-check-label" for="flexRadioDefault1" contenteditable="true" id="radio_4" style = "display: flex;" disabled>Ответ</label>
+						<button type="button" id="del-answer-btn" class="btn-close" aria-label="Close" style = "    display: block;
+    margin-right: 0;
+    width: 0.5em;
+    height: 0.5em;
+    margin-left: auto;"></button></div>
+    
+                    </div>
+                </div>
+				<button type="button" class="btn btn-outline-dark" id="add-answer-btn" style="padding: 0 10px;font-size: 10pt; margin-top: 10px; margin-left: 5px">Добавить вариант</button>
+                <div class="input-group mb-3 p-3">
+                    <span class="input-group-text" id="basic-addon1">Ответ:</span>
+                    <input type="text" class="form-control" placeholder="" value="" aria-label="Username" aria-describedby="basic-addon1">
+                </div>
+                <button type="button" class="btn btn-outline-success" style="display: block;
+                    margin-left: auto;
+                    margin-right: 0;" id="add-card-btn">Добавить</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+		const TEST_MODE = false
+	
+        async function getQuestons(password) {
+			if(TEST_MODE){
+				let n = ''
+				return JSON.parse(n)
+			}
+		
+            try {
+                let response = await fetch('/get_questions', {
+                    method: 'POST',
+                    body: 'test_password=' + password
+                });
+                return await response.json()
+            } catch (error) {
+                return false;
+            }
+        }
+
+        async function delQuestion(password, id) {
+			if(TEST_MODE) return Math.random() > 0.5
+		
+            try {
+                let response = await fetch('/delete_question', {
+                    method: 'POST',
+                    body: 'test_password=' + password + '&question_id=' + id
+                });
+                return (await response.text()) == 'OK'
+            } catch (error) {
+                return false;
+            }
+        }
+
+        async function addQuestion(password, q) {
+			if(TEST_MODE) return Math.random() > 0.5
+            try {
+                let response = await fetch('/add_question', {
+                    method: 'POST',
+                    body: 'test_password=' + password +
+                        '&kind=' + q.kind +
+                        '&content=' + q.content +
+                        '&json_answers=' + JSON.stringify(q.answers) +
+                        '&right_answ=' + q.right_answ
+                });
+				console.log('test_password=' + password +
+                        '&kind=' + q.kind +
+                        '&content=' + q.content +
+                        '&json_answers=' + JSON.stringify(q.answers) +
+                        '&right_answ=' + q.right_answ)
+                return await response.text()
+            } catch (error) {
+                return false;
+            }
+        }
+
+        async function getTest(password) {
+			if(TEST_MODE) return "[]"
+            try {
+                let response = await fetch('/get_test', {
+                    method: 'POST',
+                    body: 'test_password=' + password
+                });
+                return await response.json()
+            } catch (error) {
+                return false;
+            }
+        }
+		
+		async function getUsers(password) {
+			let test = await getTest(password)
+			return test.users
+		}
+
+        async function addUser(password, name) {
+			if(TEST_MODE) return Math.random() > 0.5
+            try {
+                let response = await fetch('/add_user', {
+                    method: 'POST',
+                    body: 'test_password=' + password +
+                        '&user_name=' + name
+                });
+                return await response.text()
+            } catch (error) {
+                return false;
+            }
+        }
+		
+		async function createTest(name, test_type) {
+			if(TEST_MODE) return Math.random() > 0.5
+            try {
+                let response = await fetch('/create_test', {
+                    method: 'POST',
+                    body: 'test_name=' + name +
+                        '&test_type=' + test_type
+                });
+                return await response.text()
+            } catch (error) {
+                return false;
+            }
+        }
+
+        var userListTabNode = document.getElementById("list-home-list").cloneNode(true)
+        console.log(userListTabNode)
+        let userList = document.getElementById("user-list-tab")
+        let userInfo = document.getElementById("list-home").cloneNode(true)
+        let userInfoDiv = document.getElementById("list-home").parentElement
+        document.getElementById('list-home').remove()
+        document.getElementById("list-home-list").remove()
+
+        function showUsers(Users) {
+			
+			if(Users.length != 0)
+				if (document.getElementById('export-btn').classList.contains("disabled"))
+				document.getElementById('export-btn').classList.remove("disabled");
+		
+            userList.innerHTML = ''
+			userInfoDiv.innerHTML = ''
+
+            setTimeout(function() {
+                document.getElementById('users-column').classList.add("show")
+            }, 100)
+			
+			let users = Users
+			if(test_type == "FORM"){
+				users = []
+				let userNames = []
+				Users.forEach(el => userNames.push(el.name))
+				let groupNames = [...(new Set(userNames))]
+				for(let i = 0; i < groupNames.length; i++){
+					let element = {}
+					element.name = groupNames[i]
+					element.done = true
+					element.answers = []
+					let count = 0
+					let done_count = 0
+					let passwords = []
+					Users.forEach(function(el){if(el.name == groupNames[i]) {
+						if(!el.crypted){
+							count++;
+							passwords.push(el.password)
+						}
+						else { if(el.done) done_count++ }
+					}})
+					element.good_count = done_count + '/' + count
+					element.password = "</br>" + passwords.join("</br>")
+					users.push(element)
+				}
+			}
+			
+            for (let i = 0; i < users.length; i++) {
+                const element = users[i];
+                let tab = userListTabNode.cloneNode(true)
+                let goodCountBadge = tab.getElementsByTagName('span')[0]
+                tab.innerHTML = tab.innerHTML.replace("NAME", element.name)
+                tab.innerHTML = tab.innerHTML.replace("COUNT", element.good_count)
+                if (!element.done) {
+                    tab.getElementsByTagName('span')[0].remove()
+                }
+                // tab.getElementsByTagName("i")[0].textContent = element.good_count
+                userList.appendChild(tab)
+                let newEl = document.getElementById('list-home-list')
+                newEl.id = "list-" + i + "-list"
+                newEl.href = "#" + "list-" + i
+                newEl.setAttribute('aria-controls', "list-" + i)
+
+
+                let infoElement = userInfo.cloneNode(true)
+                for (let j = 0; j < element.answers.length; j++) {
+                    const answ = element.answers[j];
+                    let h5 = document.createElement("h5")
+                    h5.textContent = answ.content
+                    let h6 = document.createElement("h6")
+                    h6.textContent = answ.user_answ
+
+                    if (answ.user_answ == answ.right_answ)
+                        h6.style.color = "green"
+                    else
+                        h6.style.color = "red"
+
+                    infoElement.appendChild(h5)
+                    infoElement.appendChild(h6)
+                }
+                let p = document.createElement("p")
+                p.innerHTML = "<b>Пароль: </b>" + element.password
+                infoElement.appendChild(p)
+                userInfoDiv.appendChild(infoElement)
+                newEl = document.getElementById('list-home')
+                newEl.id = "list-" + i
+                newEl.setAttribute('aria-labelledby', "list-" + i + "-list")
+            }
+        }
+
+        let password
+		let test_type
+
+        let card_node = document.getElementById('q_card').cloneNode(true)
+        document.getElementById('q_card').remove()
+
+        let card_editor_node = document.getElementById('card_editor').cloneNode(true)
+        document.getElementById('card_editor').remove()
+
+        let card_editor_kind = 1
+        let cardsEditorCreated = false
+
+        let cardsGrid = document.getElementById('cards_grid')
+
+        card_editor_node.getElementsByClassName('card-title')[0].contentEditable = true
+        card_editor_node.getElementsByClassName('input-group mb-3 p-3')[0].style.display = 'none'
+
+		card_editor_kind = 1
+		
+        function addCardEditor() {
+			card_editor_node.getElementsByClassName('form-check')[0].getElementsByTagName('input')[0].disabled = test_type == "FORM"
+			let answerNode = card_editor_node.getElementsByClassName('form-check')[0].cloneNode(true)
+			let answersContainer = card_editor_node.getElementsByClassName('form-check')[0].parentElement
+            cardsGrid.appendChild(card_editor_node)
+            if (cardsEditorCreated) return
+            cardsEditorCreated = true
+            document.getElementById('btnradio1').addEventListener('click', function(e) {
+                card_editor_kind = 1
+                let els = e.target.parentElement.parentElement.getElementsByClassName('form-check-input')
+                let labels = e.target.parentElement.parentElement.getElementsByClassName('form-check')
+				document.getElementById('add-answer-btn').style.display = ''
+                for (let i = 0; i < els.length; i++) {
+                    els[i].type = 'radio'
+                    els[i].style.display = ''
+                    labels[i].style.display = ''
+                }
+                e.target.parentElement.parentElement.getElementsByClassName('input-group mb-3 p-3')[0].style.display = 'none'
+            })
+
+            document.getElementById('btnradio2').addEventListener('click', function(e) {
+                card_editor_kind = 2
+                let els = e.target.parentElement.parentElement.getElementsByClassName('form-check-input')
+                let labels = e.target.parentElement.parentElement.getElementsByClassName('form-check')
+				document.getElementById('add-answer-btn').style.display = ''
+                for (let i = 0; i < els.length; i++) {
+                    els[i].type = 'checkbox'
+                    els[i].style.display = ''
+                    labels[i].style.display = ''
+                }
+                e.target.parentElement.parentElement.getElementsByClassName('input-group mb-3 p-3')[0].style.display = 'none'
+            })
+
+            document.getElementById('btnradio3').addEventListener('click', function(e) {
+                card_editor_kind = 3
+                let els = e.target.parentElement.parentElement.getElementsByClassName('form-check-input')
+                let labels = e.target.parentElement.parentElement.getElementsByClassName('form-check')
+                document.getElementById('add-answer-btn').style.display = 'none'
+				for (let i = 0; i < els.length; i++) {
+                    els[i].style.display = 'none'
+                    labels[i].style.display = 'none'
+                }
+				console.log(e.target.parentElement.parentElement.getElementsByClassName('input-group mb-3 p-3')[0])
+				e.target.parentElement.parentElement.getElementsByClassName('input-group mb-3 p-3')[0].getElementsByTagName('input')[0].disabled = test_type == "FORM"
+                e.target.parentElement.parentElement.getElementsByClassName('input-group mb-3 p-3')[0].style.display = ''
+            })
+			
+			document.getElementById('add-answer-btn').addEventListener('click', function(e) {
+				let newInput = answersContainer.appendChild(answerNode.cloneNode(true))
+				if(card_editor_kind == 2)
+					newInput.getElementsByTagName('input')[0].type = 'checkbox'
+				newInput.getElementsByClassName('btn-close')[0].addEventListener('click', function(e){
+					e.target.parentElement.parentElement.remove()
+				})
+			})
+
+            document.getElementById('add-card-btn').addEventListener('click', async function(e) {
+                let right_answ
+                let answers = []
+
+                if (card_editor_kind != 3) {
+
+                    right_answ = []
+                    let els = e.target.parentElement.parentElement.getElementsByClassName('form-check-input')
+                    let labels = e.target.parentElement.parentElement.getElementsByClassName('form-check-label')
+                    for (let i = 0; i < els.length; i++) {
+                        answers.push(labels[i].textContent)
+                        if (els[i].checked)
+                            right_answ.push(labels[i].textContent)
+                    }
+                    right_answ = right_answ.join(',')
+                } else {
+                    answers = []
+                    right_answ = e.target.parentElement.getElementsByClassName('form-control')[0].value
+                }
+
+                if (right_answ == "" && test_type == "TEST")
+                    return
+
+                let q = {}
+                q.kind = card_editor_kind
+                q.content = e.target.parentElement.getElementsByClassName('card-title')[0].textContent
+
+                q.answers = answers
+
+                q.right_answ = right_answ
+
+                let res = await addQuestion(password, q)
+                if (res == '') return
+
+                e.target.parentElement.parentElement.remove()
+				q.id = res
+                addCard(q)
+                addCardEditor()
+
+                console.log(right_answ)
+                console.log(answers)
+            })
+        }
+
+        function addCard(q) {
+            let newNode = card_node.cloneNode(true)
+            newNode.getElementsByClassName('card-title')[0].textContent = q.content
+            let labelNode = newNode.getElementsByTagName('label')[0].parentElement.cloneNode(true)
+			let labelsContainer = newNode.getElementsByTagName('label')[0].parentElement.parentElement
+			newNode.getElementsByTagName('label')[0].parentElement.remove()
+            let answers = q.answers
+            let right_answers = q.right_answ.split(',')
+            let to_del = []
+			let delBtnNode = newNode.getElementsByClassName('btn-outline-danger')[0].cloneNode(true)
+			newNode.getElementsByClassName('btn-outline-danger')[0].remove()
+
+            if (q.kind == 3) {
+                
+            } else {
+                let textbox = newNode.getElementsByClassName('input-group')[0]
+                textbox.remove()
+                for (let j = 0; j < answers.length; j++) {
+                    if (answers[j] != "") {
+						let label = labelNode.cloneNode(true)
+						let labelEl = label.getElementsByTagName('input')[0]
+                        label.getElementsByTagName('label')[0].textContent = answers[j]
+                        labelEl.name = q.content + Math.floor(Math.random() * 10000)
+                        labelEl.disabled = true
+						if (q.kind == 2)
+							labelEl.type = 'checkbox'
+                        if (right_answers.indexOf(answers[j]) != -1)
+                            labelEl.checked = true
+						labelsContainer.appendChild(label)
+                    }
+                }
+            }
+
+
+            delBtnNode.addEventListener("click", async function(e) {
+                let res = await delQuestion(password, q.id)
+                if (res) {
+                    e.target.parentNode.parentNode.remove()
+                }
+            })
+			labelsContainer.appendChild(delBtnNode)
+
+            if (q.kind == 3) {
+                newNode.getElementsByClassName('form-control')[0].value = q.right_answ
+            }
+
+            to_del.forEach(a => a.remove())
+            let newEl = cardsGrid.appendChild(newNode)
+            setTimeout(function() {
+                newEl.classList.add("show")
+            }, 100)
+
+        }
+
+        function drawQuestions(test) {
+            for (let i = 0; i < test.length; i++) {
+                let q = test[i]
+                addCard(q)
+            }
+            addCardEditor()
+        }
+		
+		document.getElementsByClassName('link-dark collapsed')[0].style.display = 'none'
+		
+		async function openTest(password) {
+			let res = await getQuestons(password)
+			let test = await getTest(password);
+            if (!res) {
+                return false
+            }
+
+			document.getElementById('test-title').textContent = test.name + " | " + (test.test_type == "TEST" ? "Тест" : "Анкета")
+			test_type = test.test_type;
+			document.getElementById('password-output').textContent = password
+			document.getElementsByClassName('link-dark collapsed')[0].style.display = ''
+            document.getElementById('login_panel').remove()
+            drawQuestions(res)
+            showUsers(test.users);
+			
+			userInfo.style.overflow = "auto"
+			if(test_type == "TEST")
+			{
+				newUserCount.style.display = "none"
+				userInfo.style.maxHeight = "20rem"
+			}
+			if(test_type == "FORM")
+			{
+				userInfo.style.maxHeight = "10rem"
+				document.getElementById('mass-adding-btn').classList.add('disabled')
+				newUserNameTextBlock.placeholder = "Имя группы"
+			}
+			
+			return true
+		}
+
+        let openBtn = document.getElementById('open_btn')
+        openBtn.addEventListener('click', async function(e) {
+            password = document.getElementById('password_input').value
+            let openned = await openTest(password)
+			if(!openned)
+				document.getElementById('password_input').classList.add("is-invalid");
+        })
+
+        let addUserBtn = document.getElementById('add-user-btn')
+        let newUserNameTextBlock = document.getElementById('new-user-name-text')
+		let newUserCount = document.getElementById('new-user-count')
+        addUserBtn.addEventListener('click', async function(e) {
+            if (newUserNameTextBlock.value == '') return;
+			let count = +newUserCount.value
+			if(test_type == "FORM"){
+				if(count)
+					for(let i = 0; i < count; i++)
+						await addUser(password, newUserNameTextBlock.value)
+			}
+			else
+				await addUser(password, newUserNameTextBlock.value)
+            var users = await getUsers(password);
+            showUsers(users);
+        })
+		
+		
+		document.getElementById('update-users-btn').addEventListener('click', async function(e){
+			var users = await getUsers(password);
+            showUsers(users);
+		})
+	
+		let massAddBtn = document.getElementById('mass-add-btn')
+		let massAddArea = document.getElementById('mass-add-area')
+		massAddBtn.addEventListener('click', async function(e) {
+			let newUsers = massAddArea.value.split(',')
+			if(massAddArea.value.length == 0) return
+			massAddArea.value = ''
+			for(let i = 0; i < newUsers.length; i++)
+				await addUser(password, newUsers[i])
+			massAddArea.parentElement.classList.add('was-validated')
+			var users = await getUsers(password);
+            showUsers(users);
+		})
+		
+		document.getElementById('mass-adding-btn').addEventListener('click', function(){
+			if (massAddArea.parentElement.classList.contains("was-validated"))
+				massAddArea.parentElement.classList.remove("was-validated");
+		})
+		
+		function convertToCSV(arr) {
+		  const array = [Object.keys(arr[0])].concat(arr)
+		  return array.map(it => {
+			return Object.values(it).join(';')
+		  }).join('\\n')
+		}
+		
+		function encodeCP1251(string) {
+			function encodeChar(c) {
+				var isKyr = function (str) {
+					return /[а-я]/i.test(str);
+				}
+				var cp1251 = 'ЂЃ‚ѓ„…†‡€‰Љ‹ЊЌЋЏђ‘’“”•–—�™љ›њќћџ ЎўЈ¤Ґ¦§Ё©Є«¬*®Ї°±Ііґµ¶·\
+		ё№є»јЅѕїАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя'; 
+				var p = isKyr(c) ? (cp1251.indexOf(c) + 128) : c.charCodeAt(0);
+				var h = p.toString(16);
+				if (h=='a'){
+					h = '0A';
+				}
+				return '%' + h;
+			}
+			var res = '';
+			for (var i = 0; i < string.length; i++) { 
+				res += encodeChar(string.charAt(i)) //ну или string[i]
+			}
+			return res;
+		}
+
+		function download(filename, text) {
+		  var element = document.createElement('a');
+		  element.setAttribute('href', 'data:text/csv;charset=cp1251,' + encodeCP1251(text));
+		  element.setAttribute('download', filename);
+
+		  element.style.display = 'none';
+		  document.body.appendChild(element);
+
+		  element.click();
+
+		  document.body.removeChild(element);
+		}
+
+		function mapUserAnswers(users, questions){
+			return [...users.map(function(it){
+			let el = {}
+			el['Имя'] = it.name + '_' + it.question_id
+			el['Пароль'] = it.password
+			el['Дата выполнения'] = it.done_date
+			el['Тест выполнен'] = it.done ? "+" : "-"
+			if(test_type == "TEST")
+				el['Число верных'] = it.good_count
+			if(test_type == "FORM")
+				el['Зашифрован'] = it.crypted ? "+" : "-"
+			questions.forEach(function(q){
+				const name = q.content + (q.right_answ == "" ? "" : "(" + q.right_answ + ")")
+				el[name] = ""
+				let ans = it.answers.find(s => s.question_id == q.id)
+				if(ans) el[name] = ans.user_answ
+			})
+			return el
+			})]
+		}
+
+		document.getElementById('export-btn').addEventListener('click', async function(){
+			let users = await getUsers(password);
+			if(users.length == "") return
+			let questions = await getQuestons(password);
+			download("export.csv", convertToCSV(mapUserAnswers(users, questions)))
+		})
+		
+		document.getElementById('create_test_btn').addEventListener('click', async function() {
+			let name = document.getElementById('test_name_input').value
+			test_type = document.getElementById('is_form_checkbox').checked ? "FORM" : "TEST"
+			password = await createTest(name, test_type)
+			if(password != '') {
+				let openned = await openTest(password)
+				if(!openned)
+					alert("Неизвестная ошибка!")
+			} else {
+				document.getElementById('test_name_input').classList.add("is-invalid");
+			}
+		})
+		
+    </script>
+</body>
+
+</html>

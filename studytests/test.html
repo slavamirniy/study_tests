@@ -1,0 +1,313 @@
+﻿<html>
+
+<head>
+    <title>
+        Пройти тест
+    </title>
+    <link href="@css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+	<script src="@js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body style="height:100%">
+
+	<section>
+		<div class="container" style="height:100%">
+			<div class="row" style="height:100%">
+					<div class="card col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6" style="margin: auto 0">
+						<div class="card-body">
+							<h5 class="card-title" id="cardTitle">Card title</h5>
+							<h6 class="card-subtitle mb-2 text-muted" id="cardSubtitle">Card subtitle</h6>
+							<div id="answersBlock">
+								<div class="form-check" id="radioBlock">
+									<input class="form-check-input" type="radio" name="flexRadioDefault">
+									<label class="form-check-label" for="flexRadioDefault1">Вариант ответа</label>
+								</div>
+							</div>
+							<div class="input-group mb-3 p-3 has-validation" id="textBlock">
+								<span id="textLeft" class="input-group-text" id="basic-addon1">Ответ:</span>
+								<input id="answerText" type="text" class="form-control" placeholder="" value="" aria-label="Username" aria-describedby="basic-addon1">
+								<div class="invalid-feedback" id="textError">Ошибка</div>
+							</div>
+							<button id="answerBtn" type="button" class="btn btn-outline-success" style="display: block;
+								margin-left: auto;
+								margin-right: 0;">Ответить</button>
+						</div>
+					</div>
+			</div>
+		</div>
+	</section>
+
+	<script>
+		let TEST_MODE = false
+	
+		let title = document.getElementById("cardTitle")
+		let subtitle = document.getElementById("cardSubtitle")
+		let answersBlock = document.getElementById("answersBlock")
+		let radioBlock = document.getElementById("radioBlock").cloneNode(true)
+		document.getElementById("radioBlock").remove()
+		let textBlock = document.getElementById("textBlock")
+		let answerText = document.getElementById("answerText")
+		let answerBtn = document.getElementById("answerBtn")
+		let textError = document.getElementById("textError")
+		let textLeft = document.getElementById("textLeft")
+		
+		let step
+		
+		let password, code, test
+		code = ''
+		
+		async function auth(password, code) {
+			if(TEST_MODE){
+				let n = '{"name":"q","done":false,"test_name":"qwe","register_needed":false,"auth_needed":true,"questions":[{"id":24,"kind":1,"content":"Вопрос","answers":["Ответ"]},{"id":25,"kind":2,"content":"Вопрос","answers":["Ответ"]},{"id":26,"kind":3,"content":"Вопрос","answers":[]}]}'
+				return JSON.parse(n)
+			}
+		
+            try {
+                let response = await fetch('/auth', {
+                    method: 'POST',
+                    body: 'user_password=' + password + '&code_word=' + (code ? code : "")
+                });
+                return await response.json()
+            } catch (error) {
+                return false;
+            }
+        }
+		
+		async function answer(password, code, question_id, user_answer) {
+			if(TEST_MODE){
+				return 'OK'
+			}
+		
+            try {
+                let response = await fetch('/add_answer', {
+                    method: 'POST',
+                    body: 'user_password=' + password +
+					'&code_word=' + (code ? code : "") +
+					'&question_id=' + question_id +
+					'&user_answer=' + user_answer
+                });
+                return await response.text()
+            } catch (error) {
+                return false;
+            }
+        }
+		
+		async function register(password, code) {
+			if(TEST_MODE){
+				return 'OK'
+			}
+		
+            try {
+                let response = await fetch('/register', {
+                    method: 'POST',
+                    body: 'user_password=' + password + '&code_word=' + (code ? code : "")
+                });
+                return await response.text()
+            } catch (error) {
+                return false;
+            }
+        }
+		
+		function drawQuestion(q){
+			answersBlock.innerHTML = ''
+			answerText.value = ''
+			answerText.classList.remove('is-invalid')
+			textLeft.textContent = "Ответ:"
+			answerBtn.textContent = "Далее"
+		
+			title.textContent = q.content
+		
+			if(q.kind == 1 || q.kind == 2){
+				subtitle.textContent = q.kind == 1 ? "Выберите один вариант ответа" : "Может быть несколько вариантов ответа"
+				
+				q.answers.forEach(function(Q){
+					let newEl = answersBlock.appendChild(radioBlock.cloneNode(true))
+					newEl.getElementsByTagName('label')[0].textContent = Q
+					newEl.getElementsByTagName('input')[0].text = Q
+					
+					if(q.kind == 2)
+						newEl.getElementsByTagName('input')[0].type = "checkbox"
+				})
+				
+				answersBlock.style.display = ''
+				textBlock.style.display = 'none'
+			}
+			
+			if(q.kind == 3){
+				subtitle.textContent = "Введите ответ ниже"
+				answersBlock.style.display = 'none'
+				textBlock.style.display = ''
+			}
+		}
+		
+		function showAuthStep(){
+			title.textContent = "Введите Ваш код"
+			subtitle.textContent = ""
+			textLeft.textContent = "Код:"
+			answerBtn.textContent = "Вход"
+			answerText.value = ''
+			answerText.classList.remove('is-invalid')
+			
+			answerBtn.onclick = async function(){
+				password = answerText.value
+				test = await auth(password)
+				if(!test) {
+					textError.textContent = "Неверный код"
+					answerText.classList.add('is-invalid')
+					return
+				}
+				
+				if(test.done){
+					textError.textContent = "Тест уже был пройден"
+					answerText.classList.add('is-invalid')
+					return
+				}
+				
+				if(test.register_needed){
+					showRegisterStep()
+					return
+				}
+				
+				if(test.auth_needed){
+					showLoginStep()
+					return
+				}
+				
+				if(test.questions.length == 0){
+					textError.textContent = "Тест пуст"
+					answerText.classList.add('is-invalid')
+					return
+				}
+				
+				startTest()
+			}
+			
+			answersBlock.style.display = 'none'
+			textBlock.style.display = ''
+		}
+		
+		function showRegisterStep(){
+			title.textContent = "Придумайте пароль"
+			subtitle.innerHTML = "Пароль гарантирует анонимность ваших ответов.<br>Запомните пароль: он вам пригодится для входа, если вы захотите вернуться к анкете через время."
+			textLeft.textContent = "Пароль:"
+			answerBtn.textContent = "Вход"
+			answerText.classList.remove('is-invalid')
+			answerText.value = ''
+			
+			answerBtn.onclick = async function(){
+				code = answerText.value
+				if(code.length <= 4) {
+					textError.textContent = "Пароль должен быть больше 4 символов"
+					answerText.classList.add('is-invalid')	
+					return
+				}
+				
+				let res = await register(password, code)
+				
+				if(!res){
+					textError.textContent = "Ошибка сервера"
+					answerText.classList.add('is-invalid')
+					return
+				}
+				
+				test = await auth(password, code)
+				
+				if(test.questions.length == 0) {
+					title.textContent = "Тест пуст."
+					subtitle.innerHTML = ""
+					answerBtn.textContent = "Назад"
+					textBlock.style.display = 'none'
+					
+					answerBtn.onclick = showAuthStep
+					return
+				}
+				
+				startTest()
+			}
+		}
+		
+		function showLoginStep(){
+			title.textContent = "Введите пароль"
+			subtitle.innerHTML = "Постарайтесь вспомнить пароль, который вы придумали, когда начинали проходить данную анкету. Без пароля вы не получите доступа к своей анкете."
+			textLeft.textContent = "Пароль:"
+			answerBtn.textContent = "Вход"
+			answerText.classList.remove('is-invalid')
+			answerText.value = ''
+			
+			answerBtn.onclick = async function(){
+				code = answerText.value
+				
+				let res = await auth(password, code)
+				
+				if(!res){
+					textError.textContent = "Код неверный"
+					answerText.classList.add('is-invalid')
+					return
+				}
+				
+				test = await auth(password, code)
+				
+				if(test.questions.length == 0) {
+					title.textContent = "Тест пуст."
+					subtitle.innerHTML = ""
+					answerBtn.textContent = "Назад"
+					textBlock.style.display = 'none'
+					
+					answerBtn.onclick = showAuthStep
+					return
+				}
+				
+				startTest()
+			}
+		}
+		
+		function startTest(){
+			step = 0
+			drawQuestion(test.questions[step])
+			
+			answerBtn.onclick = async function(){
+				let answ = ''
+				if(test.questions[step].kind != 3){
+					let btns = Array.from(answersBlock.children)
+					let a = []
+					btns.forEach(function(b){if(b.children[0].checked) a.push(b.children[0].text)})
+					answ = a.join(',')
+				} else {
+					answ = answerText.value
+				}
+				
+				if(answ == "") return
+				
+				let res = await answer(password, code, test.questions[step].id, answ)
+				if(!res){
+					return
+				}
+				
+				step++
+				if(step > test.questions.length - 1){
+					showEndStep()
+					return
+				}
+				drawQuestion(test.questions[step])
+			}
+		}
+		
+		function showEndStep(){
+			answersBlock.innerHTML = ''
+			title.textContent = "Тест закончен."
+			subtitle.textContent = "Спасибо за прохождение"
+			answerBtn.textContent = "Назад"
+			textBlock.style.display = 'none'
+					
+			answerBtn.onclick = showAuthStep
+		}
+		
+		showAuthStep()
+	</script>
+
+</body>
+
+</html>
