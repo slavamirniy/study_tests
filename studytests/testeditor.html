@@ -76,6 +76,16 @@
                 <div class="row row-cols-1 row-cols-md-1 g-4 p-5" style="max-width: 48rem;" id="cards_grid">
                     <div class="col"><h3 id="test-title"></h3>
 					<a class="link-dark collapsed" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">Пароль теста</a>
+					<div class="btn-group" id="export-btns">
+						<button type="button" class="btn btn-outline-dark" id="update-questions-btn" style="padding: 0 10px;font-size: 10pt; margin-left:1rem">Обновить вопросы</button>
+						<button class="btn btn-outline-dark dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+						<span class="visually-hidden">Some</span>
+						</button><ul class="dropdown-menu dropdown-menu-end" style="padding: 0px 10px; font-size: 10pt;">
+							<li><a class="dropdown-item" href="#" id="export-questions-btn" data-bs-toggle="modal" data-bs-target="#">Экспорт вопросов</a></li>
+<li><a class="dropdown-item" href="#" id="import-questions-btn" data-bs-toggle="modal" data-bs-target="#">Импорт вопросов</a></li>
+						</ul>
+
+					</div>
 					</div>
 					<div class="collapse" id="collapseExample" style="">
 					  <div class="card card-body" id = "password-output">
@@ -153,13 +163,13 @@
                 <h5 class="card-title p-2" id="new-card-title">Вопрос</h5>
                 <div class="btn-group p-2" role="group" aria-label="Basic radio toggle button group">
                     <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" checked>
-                    <label class="btn btn-outline-primary" for="btnradio1">Кружочки</label>
+                    <label class="btn btn-outline-primary" for="btnradio1">Один из многих</label>
 
                     <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off">
-                    <label class="btn btn-outline-primary" for="btnradio2">Квадратики</label>
+                    <label class="btn btn-outline-primary" for="btnradio2">Многие из многих</label>
 
                     <input type="radio" class="btn-check" name="btnradio" id="btnradio3" autocomplete="off">
-                    <label class="btn btn-outline-primary" for="btnradio3">Текст</label>
+                    <label class="btn btn-outline-primary" for="btnradio3">Открытый ответ</label>
                 </div>
                 <div class="p-2">
                     <div class="form-check">
@@ -571,13 +581,14 @@
             if (!res) {
                 return false
             }
-
+			
+			document.getElementById('export-btns').style.display = ''
 			document.getElementById('test-title').textContent = test.name + " | " + (test.test_type == "TEST" ? "Тест" : "Анкета")
 			test_type = test.test_type;
 			document.getElementById('password-output').textContent = password
 			document.getElementsByClassName('link-dark collapsed')[0].style.display = ''
             document.getElementById('login_panel').remove()
-            drawQuestions(res)
+            drawQuestions(res);
             showUsers(test.users);
 			
 			userInfo.style.overflow = "auto"
@@ -672,6 +683,17 @@
 			}
 			return res;
 		}
+		
+		function decodeCP1251(string){
+			function decodeChar(s, p) {
+				var cp1251 = 'ЂЃ‚ѓ„…†‡€‰Љ‹ЊЌЋЏђ‘’“”•–—�™љ›њќћџ ЎўЈ¤Ґ¦§Ё©Є«¬*®Ї°±Ііґµ¶·\
+		ё№є»јЅѕїАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя';
+				p = parseInt(p, 16);
+				return p < 128 ? String.fromCharCode(p) : cp1251[p - 128];
+			}
+			var str = string;
+			return str.replace(/%(..)/g,decodeChar);
+		}
 
 		function download(filename, text) {
 		  var element = document.createElement('a');
@@ -689,7 +711,7 @@
 		function mapUserAnswers(users, questions){
 			return [...users.map(function(it){
 			let el = {}
-			el['Имя'] = it.name + '_' + it.question_id
+			el['Имя'] = it.name
 			el['Пароль'] = it.password
 			el['Дата выполнения'] = it.done_date
 			el['Тест выполнен'] = it.done ? "+" : "-"
@@ -698,7 +720,7 @@
 			if(test_type == "FORM")
 				el['Зашифрован'] = it.crypted ? "+" : "-"
 			questions.forEach(function(q){
-				const name = q.content + (q.right_answ == "" ? "" : "(" + q.right_answ + ")")
+				const name = q.content + (q.right_answ == "" ? "" : "(" + q.right_answ + ")") + '_' + q.id
 				el[name] = ""
 				let ans = it.answers.find(s => s.question_id == q.id)
 				if(ans) el[name] = ans.user_answ
@@ -706,7 +728,7 @@
 			return el
 			})]
 		}
-
+		
 		document.getElementById('export-btn').addEventListener('click', async function(){
 			let users = await getUsers(password);
 			if(users.length == "") return
@@ -725,6 +747,40 @@
 			} else {
 				document.getElementById('test_name_input').classList.add("is-invalid");
 			}
+		})
+		
+		document.getElementById('export-btns').style.display = 'none'
+		document.getElementById('update-questions-btn').addEventListener('click', async function(){
+			let res = await getQuestons(password)
+			Array.from(document.getElementsByClassName('card fade show')).forEach(c => c.remove())
+			drawQuestions(res)
+		})
+		
+		document.getElementById('export-questions-btn').addEventListener('click', async function(){
+			let res = await getQuestons(password)
+			download('questions.json', encodeCP1251(JSON.stringify(res)))
+		})
+		
+		document.getElementById('import-questions-btn').addEventListener('click', function(){
+			let openFileBtn = document.body.appendChild(document.createElement('input'))
+			openFileBtn.type = 'file'
+			openFileBtn.style.display = 'none'
+			openFileBtn.addEventListener('change', function(e){
+				var file = e.target.files[0];
+				if (!file) {
+					return;
+				}
+				var reader = new FileReader();
+				reader.onload = function(e) {
+						var contents = e.target.result;
+						var res = JSON.parse(decodeCP1251(contents));
+						res.forEach(q => addQuestion(password, q))
+						document.getElementById('update-questions-btn').click()
+				};
+				reader.readAsText(file);
+				e.target.remove();
+			}, false);
+			openFileBtn.click();
 		})
 		
     </script>
